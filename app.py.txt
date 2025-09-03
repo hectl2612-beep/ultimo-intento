@@ -1,0 +1,54 @@
+import streamlit as st
+from datetime import datetime
+
+# Estado persistente entre clics
+if "stock" not in st.session_state:
+    st.session_state.stock = 10
+if "precio" not in st.session_state:
+    st.session_state.precio = 2.5
+if "ventas" not in st.session_state:
+    st.session_state.ventas = 0
+if "historial" not in st.session_state:
+    st.session_state.historial = []
+
+st.title("🥤 Registro de Ventas de Gaseosas")
+
+# Campos editables
+st.session_state.stock = st.number_input("Cantidad de gaseosas disponibles", min_value=0, value=st.session_state.stock, step=1)
+st.session_state.precio = st.number_input("Precio de la gaseosa (S/)", min_value=0.0, value=st.session_state.precio, step=0.1)
+
+st.write("---")
+
+# Botón azul → registrar venta
+if st.button("Registrar venta", type="primary"):
+    if st.session_state.stock > 0:
+        st.session_state.stock -= 1
+        st.session_state.ventas += 1
+        fecha = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        st.session_state.historial.append(fecha)
+        st.success(f"✅ Venta registrada\n\n📅 Fecha: {fecha}\n\nProducto: Gaseosa de 1 litro")
+    else:
+        st.warning("⚠️ No hay gaseosas disponibles")
+
+# Botón rojo → calcular total
+if st.button("Calcular total"):
+    total = st.session_state.precio * st.session_state.ventas
+    st.info(f"🧮 Total acumulado: {st.session_state.precio} × {st.session_state.ventas} = S/ {total:.2f}")
+
+# Botón negro → resetear ventas
+if st.button("Resetear ventas"):
+    st.session_state.stock += st.session_state.ventas
+    st.session_state.ventas = 0
+    st.session_state.historial = []
+    st.warning("♻️ Se han eliminado las ventas registradas y devuelto el stock.")
+
+st.write("---")
+st.subheader("📊 Resumen")
+st.write(f"- Stock disponible: {st.session_state.stock}")
+st.write(f"- Ventas realizadas: {st.session_state.ventas}")
+st.write(f"- Precio actual: S/ {st.session_state.precio:.2f}")
+
+if st.session_state.historial:
+    st.subheader("🗒️ Historial de ventas")
+    for i, f in enumerate(st.session_state.historial, 1):
+        st.write(f"{i}. {f} - Gaseosa de 1 litro")
